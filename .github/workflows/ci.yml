@@ -47,7 +47,7 @@ jobs:
       - name: Verify repository
         run: scripts/check-repository.sh
       - name: Check known Go vulnerabilities
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./...
       - name: Verify reproducible release build
         run: scripts/build-release.sh v0.1.0
       - name: Verify clean tree

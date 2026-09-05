@@ -2,13 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
-	"syscall"
 	"time"
 
 	appconfig "github.com/wimi321/katago-remote-one-click/internal/config"
@@ -66,37 +62,6 @@ func writePrivateJSON(path string, value any) error {
 		return err
 	}
 	return nil
-}
-
-func currentStartToken(pid int) string {
-	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
-	if err != nil {
-		return ""
-	}
-	line := string(data)
-	closing := strings.LastIndex(line, ")")
-	if closing < 0 || closing+2 >= len(line) {
-		return ""
-	}
-	fields := strings.Fields(line[closing+2:])
-	// /proc stat field 22 is process start time; fields starts at field 3.
-	if len(fields) <= 19 {
-		return ""
-	}
-	return fields[19]
-}
-
-func processMatches(state ProcessState) bool {
-	if state.PID <= 1 {
-		return false
-	}
-	if err := syscall.Kill(state.PID, 0); err != nil && !errors.Is(err, syscall.EPERM) {
-		return false
-	}
-	if state.StartToken != "" {
-		return currentStartToken(state.PID) == state.StartToken
-	}
-	return true
 }
 
 func writeCurrentProcessState(home string) error {

@@ -5,7 +5,7 @@ VERSION="v0.1.0"
 REPOSITORY="wimi321/katago-remote-one-click"
 
 APP_URL="https://github.com/${REPOSITORY}/releases/download/${VERSION}/katago-remote-linux-amd64"
-APP_SHA256="c81845071203e5615b2cb0369e746015165afefa3b13b22fd7ba0cc8ea8bf318"
+APP_SHA256="0cd5dca750e48b024c14aa6ab0747c6300605197cd3d21b7be383d1c51f2a9dd"
 
 CLOUDFLARED_VERSION="2026.8.3"
 CLOUDFLARED_URL="https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64"

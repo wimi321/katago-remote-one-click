@@ -21,6 +21,14 @@ type channelSender struct {
 	messages chan []byte
 }
 
+func TestMain(m *testing.M) {
+	if os.Getenv("GO_WANT_KATAGO_HELPER") == "1" {
+		runFakeKataGoProcess()
+		os.Exit(0)
+	}
+	os.Exit(m.Run())
+}
+
 func (s *channelSender) SessionID() string { return s.id }
 
 func (s *channelSender) Send(_ context.Context, payload []byte) error {
@@ -121,17 +129,12 @@ func TestEngineRejectsUnsafeRequestsAsProtocolErrors(t *testing.T) {
 func startFakeEngine(t *testing.T) *Engine {
 	t.Helper()
 	directory := t.TempDir()
-	script := filepath.Join(directory, "fake-katago")
 	testBinary, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
-	contents := fmt.Sprintf("#!/bin/sh\nexec %q -test.run=TestFakeKataGoProcess -- \"$@\"\n", testBinary)
-	if err := os.WriteFile(script, []byte(contents), 0o700); err != nil {
-		t.Fatal(err)
-	}
 	engine, err := Start(context.Background(), EngineConfig{
-		Executable:      script,
+		Executable:      testBinary,
 		Model:           filepath.Join(directory, "model.bin.gz"),
 		Config:          filepath.Join(directory, "analysis.cfg"),
 		WorkingDir:      directory,
@@ -166,10 +169,7 @@ func receiveJSON(t *testing.T, messages <-chan []byte) map[string]any {
 	}
 }
 
-func TestFakeKataGoProcess(t *testing.T) {
-	if os.Getenv("GO_WANT_KATAGO_HELPER") != "1" {
-		return
-	}
+func runFakeKataGoProcess() {
 	var writeMu sync.Mutex
 	var workers sync.WaitGroup
 	write := func(value map[string]any) {
