@@ -73,7 +73,7 @@ func TestPublicQuickTunnelRoundTrip(t *testing.T) {
 	connection := dialWithRetry(t, connectionURL, 60*time.Second)
 	defer connection.CloseNow()
 
-	query := `{"id":"public-round-trip","boardXSize":19,"boardYSize":19,"rules":"Chinese","komi":7.5,"maxVisits":32}`
+	query := `{"id":"public-round-trip","moves":[],"boardXSize":19,"boardYSize":19,"rules":"Chinese","komi":7.5,"maxVisits":32}`
 	requestCtx, requestCancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer requestCancel()
 	if err := connection.Write(requestCtx, websocket.MessageText, []byte(query)); err != nil {
@@ -290,6 +290,14 @@ func TestFakeKataGoProcess(t *testing.T) {
 		action, _ := query["action"].(string)
 		if action == "query_version" {
 			write(map[string]any{"id": id, "action": action, "version": "integration"})
+			continue
+		}
+		if _, ok := query["moves"].([]any); !ok {
+			write(map[string]any{
+				"id":    id,
+				"error": "Must specify an array of [player,location] pairs",
+				"field": "moves",
+			})
 			continue
 		}
 		write(map[string]any{
